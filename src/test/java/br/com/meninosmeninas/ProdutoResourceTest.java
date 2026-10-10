@@ -10,6 +10,15 @@ import static org.hamcrest.Matchers.hasSize;
 @QuarkusTest
 class ProdutoResourceTest {
 
+        @Test
+        void healthcheckRetornaOk() {
+                given()
+                                .when().get("/api/health")
+                                .then()
+                                .statusCode(200)
+                                .body("status", equalTo("ok"));
+        }
+
     @Test
     void listaCategoriasEProdutosComFiltroOpcional() {
         given()

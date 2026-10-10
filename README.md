@@ -103,10 +103,15 @@ Retorna `200 OK` com o produto atualizado. Retorna `404 Not Found` se o produto 
 ./mvnw test
 ```
 
-## Publicação gratuita
+## Publicação gratuita da API no Render
 
-O `Dockerfile` da raiz compila e executa a API em JVM. Para publicar no Render, conecte o repositório e crie um **Web Service** usando Docker; se o repositório contiver uma pasta `menino-menina`, configure-a como **Root Directory**. O serviço usa a porta informada pelo host (`PORT`).
+O arquivo `render.yaml` define um serviço Docker gratuito e usa `GET /api/health` para verificar se a API iniciou.
 
-Configure a variável de ambiente `CORS_ORIGINS` com a origem exata do site React publicado, sem barra final. Exemplo: `https://meu-prototipo.onrender.com`. Para desenvolvimento local, o padrão já permite `http://localhost:5173`.
+1. Envie a branch `main` deste repositório ao GitHub.
+2. No Render, escolha **New > Blueprint** e conecte este repositório.
+3. Revise o serviço `menino-menina-api` detectado no `render.yaml` e aplique a configuração.
+4. Quando o deploy terminar, copie a URL `https://...onrender.com` exibida no serviço e teste `https://...onrender.com/api/health`; a resposta esperada é `{"status":"ok"}`.
+
+Para a integração do colega durante o desenvolvimento, a origem `http://localhost:5173` já é permitida por padrão, mesmo quando a API está publicada. Depois que o frontend também estiver publicado, configure no serviço Render a variável `CORS_ORIGINS` com a origem exata do site React, sem barra final, por exemplo `https://meu-prototipo.onrender.com`. Salve e aguarde o novo deploy.
 
 Serviços gratuitos podem suspender a API quando ficam ociosos. A primeira chamada depois da suspensão pode demorar aproximadamente um minuto; a interface deve exibir um estado de carregamento. Como o banco é H2 em memória, reinícios restauram os dados de exemplo.
