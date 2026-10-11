@@ -12,11 +12,11 @@ Requisitos: Java 21.
 
 No Windows PowerShell, use `mvnw.cmd quarkus:dev`.
 
-A API ficará em `http://localhost:8080`. O banco H2 é recriado ao iniciar e recebe os dados de exemplo de `src/main/resources/import.sql`; alterações feitas durante a demonstração não persistem após reiniciar.
+A API local ficará em `http://localhost:8080`. A versão pública está em `https://menino-menina-api.onrender.com`. O banco H2 é recriado ao iniciar e recebe os dados de exemplo de `src/main/resources/import.sql`; alterações feitas durante a demonstração não persistem após reiniciar.
 
 ## Contrato HTTP para o frontend
 
-A API recebe e retorna JSON. Em desenvolvimento, configure a URL base do React como `http://localhost:8080` (por exemplo, em `VITE_API_URL`).
+A API recebe e retorna JSON. Para desenvolvimento local com o backend na mesma máquina, use `http://localhost:8080` como URL base. Para consumir a API publicada, use `https://menino-menina-api.onrender.com` (por exemplo, em `VITE_API_URL`, se o frontend usar Vite).
 
 ### Listar categorias
 
@@ -103,15 +103,9 @@ Retorna `200 OK` com o produto atualizado. Retorna `404 Not Found` se o produto 
 ./mvnw test
 ```
 
-## Publicação gratuita da API no Render
+## API publicada no Render
 
-O arquivo `render.yaml` define um serviço Docker gratuito e usa `GET /api/health` para verificar se a API iniciou.
+A API está disponível em `https://menino-menina-api.onrender.com`; por exemplo, `GET https://menino-menina-api.onrender.com/api/produtos` lista os produtos. O health check configurado para o Render fica em `https://menino-menina-api.onrender.com/api/health` e responde `{"status":"ok"}`.
 
-1. Envie a branch `main` deste repositório ao GitHub.
-2. No Render, escolha **New > Blueprint** e conecte este repositório.
-3. Revise o serviço `menino-menina-api` detectado no `render.yaml` e aplique a configuração.
-4. Quando o deploy terminar, copie a URL `https://...onrender.com` exibida no serviço e teste `https://...onrender.com/api/health`; a resposta esperada é `{"status":"ok"}`.
-
-Para a integração do colega durante o desenvolvimento, a origem `http://localhost:5173` já é permitida por padrão, mesmo quando a API está publicada. Depois que o frontend também estiver publicado, configure no serviço Render a variável `CORS_ORIGINS` com a origem exata do site React, sem barra final, por exemplo `https://meu-prototipo.onrender.com`. Salve e aguarde o novo deploy.
 
 Serviços gratuitos podem suspender a API quando ficam ociosos. A primeira chamada depois da suspensão pode demorar aproximadamente um minuto; a interface deve exibir um estado de carregamento. Como o banco é H2 em memória, reinícios restauram os dados de exemplo.
