@@ -12,7 +12,7 @@ Requisitos: Java 21.
 
 No Windows PowerShell, use `mvnw.cmd quarkus:dev`.
 
-A API local ficará em `http://localhost:8080`. A versão pública está em `https://menino-menina-api.onrender.com`. O banco H2 é recriado ao iniciar e recebe os dados de exemplo de `src/main/resources/import.sql`; alterações feitas durante a demonstração não persistem após reiniciar.
+A API local ficará em `http://localhost:8080`. A versão pública está em `https://menino-menina-api.onrender.com`. O banco H2 em memória é recriado ao iniciar e recebe os dados de exemplo de `src/main/resources/import.sql`. Ele permanece disponível durante a vida do processo da aplicação, mas alterações feitas durante a demonstração não persistem após reiniciar.
 
 ## Contrato HTTP para o frontend
 
