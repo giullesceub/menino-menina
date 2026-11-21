@@ -135,5 +135,6 @@ Retorna `200 OK` com o produto atualizado. Retorna `404 Not Found` se o produto 
 
 A API está disponível em `https://menino-menina-api.onrender.com`; por exemplo, `GET https://menino-menina-api.onrender.com/api/produtos` lista os produtos. O health check configurado para o Render fica em `https://menino-menina-api.onrender.com/api/health` e responde `{"status":"ok"}`.
 
+O contrato completo para integração do frontend está em [`INTEGRACAO_FRONTEND.md`](./INTEGRACAO_FRONTEND.md).
 
-Serviços gratuitos podem suspender a API quando ficam ociosos. A primeira chamada depois da suspensão pode demorar aproximadamente um minuto; a interface deve exibir um estado de carregamento. Como o banco é H2 em memória, reinícios restauram os dados de exemplo.
+Serviços gratuitos podem suspender a API quando ficam ociosos. A primeira chamada depois da suspensão pode demorar aproximadamente um minuto; a interface deve exibir um estado de carregamento. O ambiente publicado usa PostgreSQL no Supabase e mantém os dados entre reinícios da API.
