@@ -1,11 +1,5 @@
 package br.com.meninosmeninas.persistence.models;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
-import jakarta.persistence.Column;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -13,14 +7,34 @@ import lombok.Setter;
 @Getter
 @Setter
 @NoArgsConstructor
-@Entity
-@Table(name = "Tipo_Categoria_Produto")
-public class TipoCategoriaProduto
-{
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+public class TipoCategoriaProduto {
     private int id;
-
-    @Column(name = "nome", nullable = false)
     private String nome;
+
+    public TipoCategoriaProduto(int id, String nome) {
+        this.id = id;
+        this.nome = nome;
+    }
+
+    public static TipoCategoriaProduto porId(Integer id) {
+        if (id == null) {
+            return null;
+        }
+        return switch (id) {
+            case 1 -> new TipoCategoriaProduto(1, "Roupas");
+            case 2 -> new TipoCategoriaProduto(2, "Calçados");
+            default -> null;
+        };
+    }
+
+    public static TipoCategoriaProduto porNome(String nome) {
+        if (nome == null) {
+            return null;
+        }
+        return switch (nome) {
+            case "Roupas" -> new TipoCategoriaProduto(1, "Roupas");
+            case "Calçados" -> new TipoCategoriaProduto(2, "Calçados");
+            default -> null;
+        };
+    }
 }

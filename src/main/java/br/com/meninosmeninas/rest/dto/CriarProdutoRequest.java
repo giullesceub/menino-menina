@@ -6,5 +6,7 @@ public record CriarProdutoRequest(
         String nome,
         Integer categoriaId,
         Integer quantidade,
-        BigDecimal preco) {
+        BigDecimal preco,
+        String login,
+        String senha) {
 }

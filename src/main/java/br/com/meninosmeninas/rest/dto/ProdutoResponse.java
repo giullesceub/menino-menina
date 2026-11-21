@@ -1,6 +1,7 @@
 package br.com.meninosmeninas.rest.dto;
 
 import br.com.meninosmeninas.persistence.models.Produto;
+import br.com.meninosmeninas.persistence.models.TipoCategoriaProduto;
 
 public record ProdutoResponse(
         int id,
@@ -11,11 +12,12 @@ public record ProdutoResponse(
         Double preco) {
 
     public static ProdutoResponse from(Produto produto) {
+        TipoCategoriaProduto categoria = TipoCategoriaProduto.porNome(produto.getCategoriaNome());
         return new ProdutoResponse(
-                produto.getId(),
+                produto.getIdInt(),
                 produto.getNome(),
-                produto.getCategoria().getId(),
-                produto.getCategoria().getNome(),
+                categoria == null ? 0 : categoria.getId(),
+                produto.getCategoriaNome(),
                 produto.getQuantidade(),
                 produto.getPreco());
     }

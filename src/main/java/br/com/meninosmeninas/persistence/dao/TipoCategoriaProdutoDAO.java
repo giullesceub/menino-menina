@@ -5,21 +5,33 @@ import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @ApplicationScoped
 public class TipoCategoriaProdutoDAO {
-
     @PersistenceContext
-    private EntityManager entityManager;
+    EntityManager entityManager;
 
+    @SuppressWarnings("unchecked")
     public List<TipoCategoriaProduto> listarTodos() {
-        return entityManager
-                .createQuery("SELECT c FROM TipoCategoriaProduto c ORDER BY c.nome", TipoCategoriaProduto.class)
-                .getResultList();
+        List<Object[]> rows = entityManager.createNativeQuery(
+                "SELECT id, nome FROM categoria ORDER BY id").getResultList();
+        List<TipoCategoriaProduto> categorias = new ArrayList<>();
+        for (Object[] row : rows) {
+            categorias.add(new TipoCategoriaProduto(((Number) row[0]).intValue(), (String) row[1]));
+        }
+        return categorias;
     }
 
     public TipoCategoriaProduto buscarPorId(int idCategoria) {
-        return entityManager.find(TipoCategoriaProduto.class, idCategoria);
+        @SuppressWarnings("unchecked")
+        List<Object[]> rows = entityManager.createNativeQuery(
+                        "SELECT id, nome FROM categoria WHERE id = :id")
+                .setParameter("id", idCategoria)
+                .getResultList();
+        return rows.isEmpty()
+                ? null
+                : new TipoCategoriaProduto(((Number) rows.get(0)[0]).intValue(), (String) rows.get(0)[1]);
     }
 }

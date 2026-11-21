@@ -6,6 +6,7 @@ import br.com.meninosmeninas.rest.dto.CriarProdutoRequest;
 import br.com.meninosmeninas.rest.dto.ErroResponse;
 import br.com.meninosmeninas.rest.dto.ProdutoResponse;
 import br.com.meninosmeninas.service.ProdutoService;
+import br.com.meninosmeninas.service.Credenciais;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.GET;
@@ -52,6 +53,7 @@ public class ProdutoResource {
         }
 
         Produto produto = produtoService.inserir(
+                new Credenciais(request.login(), request.senha()),
                 request.nome(), request.categoriaId(), request.quantidade(), request.preco());
         if (produto == null) {
             return Response.status(Response.Status.BAD_REQUEST)
@@ -75,7 +77,8 @@ public class ProdutoResource {
                     .build();
         }
 
-        Produto produto = produtoService.atualizarQuantidade(idProduto, request.quantidade());
+        Produto produto = produtoService.atualizarQuantidade(
+                new Credenciais(request.login(), request.senha()), idProduto, request.quantidade());
         if (produto == null) {
             return Response.status(Response.Status.NOT_FOUND)
                     .entity(new ErroResponse("Produto não encontrado."))
@@ -83,5 +86,19 @@ public class ProdutoResource {
         }
 
         return Response.ok(ProdutoResponse.from(produto)).build();
+    }
+
+    @PATCH
+    @Path("/{id}/desativar")
+    public Response desativar(@PathParam("id") Long id, br.com.meninosmeninas.rest.dto.CredenciaisRequest request) {
+        return Response.ok(ProdutoResponse.from(produtoService.alterarAtivo(
+                request.toCredentials(), id, false))).build();
+    }
+
+    @PATCH
+    @Path("/{id}/ativar")
+    public Response ativar(@PathParam("id") Long id, br.com.meninosmeninas.rest.dto.CredenciaisRequest request) {
+        return Response.ok(ProdutoResponse.from(produtoService.alterarAtivo(
+                request.toCredentials(), id, true))).build();
     }
 }

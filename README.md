@@ -1,6 +1,6 @@
 # Menino Menina API
 
-API do protótipo do módulo de produtos, feita com Java 21, Quarkus, Maven e H2 em memória.
+API do protótipo do módulo de produtos, feita com Java 21, Quarkus, Maven, H2 em memória e PostgreSQL.
 
 ## Executar localmente
 
@@ -12,7 +12,33 @@ Requisitos: Java 21.
 
 No Windows PowerShell, use `mvnw.cmd quarkus:dev`.
 
-A API local ficará em `http://localhost:8080`. A versão pública está em `https://menino-menina-api.onrender.com`. O banco H2 em memória é recriado ao iniciar e recebe os dados de exemplo de `src/main/resources/import.sql`. Ele permanece disponível durante a vida do processo da aplicação, mas alterações feitas durante a demonstração não persistem após reiniciar.
+A API local ficará em `http://localhost:8080`. No perfil `dev`, ela usa H2 em memória, sem exigir instalação de banco. O H2 é recriado ao iniciar e recebe os dados de exemplo de `src/main/resources/import.sql`; alterações locais não persistem após reiniciar.
+
+## Ambientes e banco de dados
+
+Os testes automatizados usam H2 em memória:
+
+```powershell
+.\mvnw.cmd clean test
+```
+
+O perfil `prod`, usado no Render, conecta ao PostgreSQL persistente do Supabase. Nesse perfil, a aplicação não recria o banco e não executa `import.sql`; o conteúdo de `src/main/resources/schema.sql` deve ser aplicado uma vez no SQL Editor do Supabase.
+
+Para inserir dados iniciais no ambiente de homologação, execute uma única vez o conteúdo de `src/main/resources/supabase-seed.sql`, depois de `schema.sql`. Esse script não deve ser usado nos testes H2.
+
+No Render, configure estas variáveis de ambiente:
+
+```text
+QUARKUS_PROFILE=prod
+QUARKUS_DATASOURCE_DB_KIND=postgresql
+QUARKUS_DATASOURCE_JDBC_URL=jdbc:postgresql://HOST:PORT/postgres?sslmode=require&prepareThreshold=0
+QUARKUS_DATASOURCE_USERNAME=usuario_do_banco
+QUARKUS_DATASOURCE_PASSWORD=senha_do_banco
+QUARKUS_DATASOURCE_JDBC_MAX_SIZE=5
+CORS_ORIGINS=https://url-do-frontend
+```
+
+Não publique esses valores no GitHub. A senha do banco deve ser cadastrada apenas como variável secreta no Render.
 
 ## Contrato HTTP para o frontend
 

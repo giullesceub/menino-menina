@@ -1,4 +1,4 @@
-services:
+ services:
   - type: web
     name: menino-menina-api
     runtime: docker
@@ -6,3 +6,4 @@ services:
     dockerfilePath: ./Dockerfile
     healthCheckPath: /api/health
     autoDeployTrigger: commit
+1
