@@ -14,7 +14,7 @@ public class ItemCompraDAO extends AbstractJpaDAO<ItemCompra> {
 
     public List<ItemCompra> listarPorCompra(Long compraId) {
         return entityManager.createQuery(
-                        "FROM ItemCompra i WHERE i.compra.id = :compraId ORDER BY i.id", ItemCompra.class)
+                        "SELECT i FROM ItemCompra i JOIN FETCH i.produto WHERE i.compra.id = :compraId ORDER BY i.id", ItemCompra.class)
                 .setParameter("compraId", compraId)
                 .getResultList();
     }

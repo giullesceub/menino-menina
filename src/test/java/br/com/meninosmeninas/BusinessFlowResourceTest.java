@@ -484,6 +484,21 @@ class BusinessFlowResourceTest {
     }
 
     @Test
+    void consultasDeCadastrosEComprasSaoPublicas() {
+        given().when().get("/api/clientes")
+                .then().statusCode(200);
+
+        given().when().get("/api/fornecedores")
+                .then().statusCode(200);
+
+        given().when().get("/api/funcionarios")
+                .then().statusCode(200);
+
+        given().when().get("/api/compras")
+                .then().statusCode(200);
+    }
+
+    @Test
     void permiteFuncionarioAlterarProprioCadastroSemAlterarDadosImutaveis() {
         given()
                 .contentType("application/json")

@@ -21,6 +21,18 @@ public class CompraService {
     @Inject AutenticacaoService autenticacaoService;
     @Inject HistoricoService historicoService;
 
+    public Compra buscar(Long id) {
+        return compraDAO.buscarComFornecedor(id);
+    }
+
+    public List<Compra> listar() {
+        return compraDAO.listarTodasComFornecedor();
+    }
+
+    public List<ItemCompra> listarItens(Long compraId) {
+        return itemDAO.listarPorCompra(compraId);
+    }
+
     @Transactional
     public Compra registrar(Credenciais credenciais, Long fornecedorId, List<ItemCompra> itens) {
         Funcionario usuario = autenticacaoService.exigirProprietaria(credenciais);

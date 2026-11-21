@@ -2,6 +2,7 @@ package br.com.meninosmeninas.rest;
 
 import br.com.meninosmeninas.persistence.models.*;
 import br.com.meninosmeninas.rest.dto.CompraRequest;
+import br.com.meninosmeninas.rest.dto.CompraResponse;
 import br.com.meninosmeninas.service.*;
 import br.com.meninosmeninas.rest.dto.ErroResponse;
 import jakarta.inject.Inject;
@@ -16,6 +17,25 @@ import java.util.ArrayList;
 @Produces(MediaType.APPLICATION_JSON)
 public class CompraResource {
     @Inject CompraService service;
+
+    @GET
+    public Response listar() {
+        var compras = service.listar().stream()
+                .map(compra -> CompraResponse.from(compra, service.listarItens(compra.getId())))
+                .toList();
+        return Response.ok(compras).build();
+    }
+
+    @GET
+    @Path("/{id}")
+    public Response buscar(@PathParam("id") Long id) {
+        Compra compra = service.buscar(id);
+        if (compra == null) {
+            return Response.status(Response.Status.NOT_FOUND).build();
+        }
+        return Response.ok(CompraResponse.from(compra, service.listarItens(compra.getId()))).build();
+    }
+
     @POST public Response registrar(CompraRequest r) {
         if (r == null) {
             return Response.status(Response.Status.BAD_REQUEST)

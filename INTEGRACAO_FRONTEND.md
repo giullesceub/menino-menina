@@ -164,7 +164,8 @@ O frontend pode indicar visualmente que uma ação exige proprietário ou vended
 
 ### Permissões esperadas
 
-- Consultas `GET`: abertas.
+- Consultas `GET`: abertas, exceto histórico, que exige proprietária.
+- Consultas públicas: categorias, produtos, clientes, fornecedores, funcionários e compras.
 - Cliente: cadastro e atualização permitem qualquer funcionário autenticado. Desativação/ativação exige `PROPRIETARIA`.
 - Fornecedor: cadastro, atualização e ativação/desativação exigem `PROPRIETARIA`.
 - Produto: cadastro e atualização de quantidade exigem `PROPRIETARIA`.
@@ -175,6 +176,8 @@ O frontend pode indicar visualmente que uma ação exige proprietário ou vended
 - Histórico: exige `PROPRIETARIA`.
 
 ## 5. Endpoints públicos de consulta
+
+Os endpoints de consulta desta seção não exigem `login` nem `senha`. Isso vale para clientes, fornecedores, funcionários e compras: suas operações `GET` são públicas.
 
 ### Health
 
@@ -707,6 +710,41 @@ GET /api/caixa/{id}/movimentacoes
 Retorna as movimentações persistidas do caixa informado.
 
 ## 8. Compras
+
+### Consultar compras — público
+
+```http
+GET /api/compras
+GET /api/compras/{id}
+```
+
+Não envie credenciais nas consultas. A listagem inclui fornecedor e itens da compra:
+
+```json
+[
+  {
+    "id": 1,
+    "fornecedorId": 1,
+    "fornecedorNome": "Confecções Pequenos Passos Ltda",
+    "dataCompra": "2026-11-21T15:00:00",
+    "valorTotal": 100.00,
+    "itens": [
+      {
+        "id": 1,
+        "produtoId": 1,
+        "produtoNome": "Body Manga Curta Algodão",
+        "quantidade": 5,
+        "custoUnitario": 20.00,
+        "subtotal": 100.00
+      }
+    ]
+  }
+]
+```
+
+`GET /api/compras/{id}` retorna `404` se a compra não existir.
+
+### Registrar compra — proprietária
 
 ```http
 POST /api/compras
