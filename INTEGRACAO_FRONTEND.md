@@ -158,26 +158,79 @@ Caso o frontend escolha guardar temporariamente a senha em estado da aplicação
 9. Se houver `403`, o usuário existe e está autenticado, mas não possui perfil necessário. Mantenha o formulário e informe que a operação exige outro nível de acesso. Não repita automaticamente a operação.
 10. Se houver `400`, corrija ou informe a mensagem de regra de negócio. Não limpe automaticamente todos os dados já preenchidos.
 11. Nunca limpe o formulário de cadastro ou feche o modal por um simples erro de credencial.
-12. Não reenvie automaticamente um POST ou PATCH após erro. O usuário deve confirmar novamente no modal.
+12. Não reenvie automaticamente uma operação `POST`, `PUT` ou `PATCH` após erro. O usuário deve confirmar novamente no modal.
 
 O frontend pode indicar visualmente que uma ação exige proprietário ou vendedor, mas essa indicação é apenas informativa. O backend continua sendo a autoridade sobre autorização. Não implemente proteção apenas escondendo botões: chamadas diretas à API ainda serão validadas pelo backend.
 
-### Permissões esperadas
+### Matriz de acessos por controle
 
-- Consultas `GET`: abertas, exceto histórico, que exige proprietária.
-- Consultas públicas: categorias, produtos, clientes, fornecedores, funcionários e compras.
-- Cliente: cadastro e atualização permitem qualquer funcionário autenticado. Desativação/ativação exige `PROPRIETARIA`.
-- Fornecedor: cadastro, atualização e ativação/desativação exigem `PROPRIETARIA`.
-- Produto: cadastro e atualização de quantidade exigem `PROPRIETARIA`.
-- Funcionário: cadastro e ativação/desativação exigem `PROPRIETARIA`. Alteração de próprio cadastro é permitida para proprietário ou vendedor. Alteração de outro funcionário exige `PROPRIETARIA`.
-- Compra: exige `PROPRIETARIA`.
-- Venda: exige funcionário autenticado, proprietário ou vendedor.
-- Caixa: abertura, entrada manual, retirada e fechamento exigem `PROPRIETARIA`. Consulta aberta exige caixa aberto.
-- Histórico: exige `PROPRIETARIA`.
+| Controle | Consulta pública | Vendedor autenticado | Proprietária autenticada |
+|---|---|---|---|
+| Categorias | `GET` liberado | Consulta liberada | Consulta liberada |
+| Produtos | `GET` liberado | Não pode cadastrar, alterar estoque/preço, desativar ou reativar; não existe endpoint público protegido para alterar um produto completo neste momento | Pode cadastrar, ajustar quantidade, desativar com estoque zero e reativar |
+| Clientes | `GET` liberado | Pode cadastrar e atualizar; pode desativar/reativar apenas se essa ação exigir proprietário | Pode cadastrar, atualizar, desativar e reativar |
+| Fornecedores | `GET` liberado | Não pode cadastrar, atualizar, desativar ou reativar | Pode cadastrar, atualizar, desativar e reativar |
+| Funcionários | `GET` liberado | Pode alterar próprio nome, telefone e senha; não pode alterar outro cadastro | Pode cadastrar e alterar cadastro próprio ou de outro; pode resetar senha; não pode alterar login/CPF e não pode desativar a própria conta |
+| Compras | `GET` liberado | Não pode registrar compra | Pode registrar compra de fornecedor/produto ativo |
+| Vendas | Não há consulta pública dedicada | Pode registrar vendas de produtos ativos com estoque suficiente | Pode registrar vendas e possui também todas as ações administrativas |
+| Caixa | Consulta de caixa aberto e movimentações liberada | Não pode abrir, movimentar manualmente ou fechar | Pode abrir, entrar, retirar e fechar |
+| Histórico | Não público | Não pode consultar | Pode consultar histórico de cliente, fornecedor, funcionário e produto |
+
+### Política de autenticação por operação
+
+- `GET`: público nos recursos explicitamente listados como público. Não envie senha ou login em uma consulta pública.
+- `POST`, `PUT` e `PATCH`: podem exigir credenciais no corpo JSON.
+- Credenciais ausentes ou inválidas: HTTP `401`.
+- Funcionário ativo sem perfil necessário: HTTP `403`.
+- Dados incompletos ou regra negada: HTTP `400`, com `mensagem` explicativa.
+- Recursos inexistentes: HTTP `404` quando o endpoint possui busca por ID.
+- Nenhum método de escrita confia exclusivamente em ocultar botão no frontend. O backend autentica e verifica a autorização novamente.
+
+### Campos de identidade da sessão simples
+
+Em todas as operações protegidas devem ser enviados:
+
+- `login`: login normalizado do funcionário;
+- `senha`: senha atual do funcionário que autoriza a operação.
+
+Regras:
+
+- login é convertido pelo backend para minúsculas, sem acentos, espaços ou símbolos;
+- login é um identificador único;
+- maiúsculas e minúsculas não precisam ser usadas pelo usuário, pois o backend normaliza ao comparar;
+- senha é sensível a maiúsculas/minúsculas e não é normalizada;
+- funcionário desativado não autentica;
+- não existe recuperação de senha automática nesta API;
+- reset de senha depende de uma proprietária ou da alteração do próprio cadastro.
+
+### Fluxo completo por tela
+
+| Tela/controle | Ao entrar | Botão ou ação | Modal de credenciais | Após sucesso | Se houver erro |
+|---|---|---|---|---|---|
+| Produtos | `GET /api/produtos` e `GET /api/categorias` | Novo produto, ajustar quantidade, desativar ou reativar | Novo, quantidade e ativação/desativação exigem proprietária | Recarregar produtos e fechar o modal principal | `401` reabre credenciais; `403` informa proprietário necessário; `400` mantém os dados do formulário |
+| Clientes | `GET /api/clientes` | Novo, editar, desativar ou reativar | Novo/editar usam credenciais de funcionário ativo; desativar/reativar exigem proprietária | Recarregar clientes | Não limpar formulário por falha de credencial |
+| Fornecedores | `GET /api/fornecedores` | Novo, editar, desativar ou reativar | Todos exigem credenciais de proprietária | Recarregar fornecedores | Manter dados e permitir nova tentativa |
+| Funcionários | `GET /api/funcionarios` | Novo, alterar próprio cadastro, alterar outro, desativar ou reativar | Novo/desativar/reativar/alterar outro exigem proprietária; alterar próprio exige login próprio | Recarregar funcionários e histórico quando necessário | `403` para alterar outro sem proprietário; `400` para regra/validação |
+| Compras | `GET /api/compras`, `GET /api/fornecedores`, `GET /api/produtos` | Registrar nova compra | Exige proprietária | Recarregar compras e produtos, pois o estoque aumenta | Não limpar itens nem credencial/formulário por erro transitório |
+| Vendas | `GET /api/produtos`, `GET /api/clientes`, eventualmente `GET /api/caixa/aberto` | Registrar venda | Exige login e senha de funcionário ativo | Recarregar produtos, caixa e dados relacionados | Validar estoque, pagamentos e caixa antes de outra tentativa |
+| Caixa | `GET /api/caixa/aberto`; carregar movimentações pelo ID | Abrir, entrada, retirada ou fechar | Todas as ações exigem proprietária | Recarregar caixa aberto e movimentações | Não fechar modal nem perder o valor informado |
+| Histórico | Abrir registro de entidade já carregado | Consultar cliente, fornecedor, funcionário ou produto | Exige proprietária em `POST /api/historico/...` | Mostrar lista ordenada de snapshots | `403` para perfil incorreto; não mostrar senha |
+
+### Estados visuais obrigatórios em cada formulário
+
+- **Inicial:** dados carregados ou estado de carregamento visível.
+- **Editando:** campos preenchidos, campos imutáveis marcados como somente leitura.
+- **Validando:** botão de enviar desabilitado enquanto aguarda o backend.
+- **Credenciais:** modal separado para login/senha, sem ocultar o formulário principal.
+- **Sucesso:** fechar modal de credenciais, manter ou fechar o formulário principal conforme a ação, recarregar lista e mostrar confirmação.
+- **401:** apagar somente a senha digitada no modal e permitir confirmar novamente.
+- **403:** manter dados e explicar o perfil necessário.
+- **400/erro de regra:** mostrar `mensagem` da API e manter os dados.
+- **Servidor suspenso:** mostrar carregamento prolongado na primeira requisição e permitir nova tentativa manual.
 
 ## 5. Endpoints públicos de consulta
 
-Os endpoints de consulta desta seção não exigem `login` nem `senha`. Isso vale para clientes, fornecedores, funcionários e compras: suas operações `GET` são públicas.
+Os endpoints de consulta desta seção não exigem `login` nem `senha`. Isso vale para categorias, produtos, clientes, fornecedores, funcionários e compras. As consultas públicas de caixa são `GET /api/caixa/aberto` e `GET /api/caixa/{id}/movimentacoes`. Nenhuma consulta pública envia senha ou login.
 
 ### Health
 
@@ -295,6 +348,35 @@ Resposta:
 A senha nunca é retornada.
 
 ## 6. Cadastros e alterações
+
+### Resumo de campos por formulário
+
+| Controle | Campos obrigatórios | Campos opcionais | Campos bloqueados/imutáveis | Permissão |
+|---|---|---|---|---|
+| Produto novo | `nome`, `categoriaId`, `quantidade`, `preco`, `login`, `senha` | Nenhum entre os dados do produto | Fornecedor não é informado neste cadastro | Proprietária |
+| Quantidade do produto | `quantidade`, `login`, `senha` | Nenhum | Nome, categoria e preço não são alterados | Proprietária |
+| Desativação/ativação de produto | `login`, `senha` | Nenhum | Só desativa com estoque zero | Proprietária |
+| Cliente novo | `nome`, `login`, `senha` | `cpf`, `telefone` | Status ativo é definido pelo backend | Qualquer funcionário ativo |
+| Alteração de cliente | `id`, `nome`, `login`, `senha` | `cpf`, `telefone` | Status ativo é preservado | Qualquer funcionário ativo |
+| Desativação/ativação de cliente | `login`, `senha` | Nenhum | Dados cadastrais são preservados | Proprietária |
+| Fornecedor novo | `razaoSocial`, `login`, `senha` | `nomeFantasia`, `cnpj`, `telefone`, `email` | Status ativo é definido pelo backend | Proprietária |
+| Alteração de fornecedor | `id`, `razaoSocial`, `login`, `senha` | `nomeFantasia`, `cnpj`, `telefone`, `email` | Status ativo é preservado | Proprietária |
+| Funcionário novo | `nome`, `login`, `senha`, `perfil`, `operadorLogin`, `operadorSenha` | `cpf`, `telefone` | Status ativo é definido pelo backend | Proprietária |
+| Alteração de funcionário | `nome`, `login`, `senha` da operação; `nome` do cadastro também é obrigatório | `telefone`, `novaSenha` | Login, CPF, perfil e ativo não podem ser alterados neste endpoint | Próprio usuário ou proprietária de outro cadastro |
+| Caixa abrir/entrada/retirada/fechar | `valor`, `login`, `senha`; retirada/entrada também exigem `descricao` | Nenhum | Caixa é identificado pelo backend | Proprietária |
+| Compra | `fornecedorId`, `itens`, `login`, `senha` | Nenhum | Custo unitário não altera preço de venda | Proprietária |
+| Venda | `itens`, `pagamentos`, `login`, `senha` | `clienteId` | Preço unitário é congelado pelo backend | Qualquer funcionário ativo |
+
+### Preenchimento seguro dos formulários
+
+- Remova espaços extremos antes da validação visual.
+- Não envie `undefined`, `NaN`, objeto vazio ou string vazia em campos numéricos.
+- Não transforme um campo opcional em `0` ou texto inválido sem necessidade.
+- Para campo opcional vazio, envie `null` ou omita, conforme o JSON mostrado no endpoint.
+- Não envie CPF/CNPJ com máscara se o backend exigir valor normalizado, e não envie mais de uma representação do mesmo dado.
+- Exiba os campos imutáveis como somente leitura, mas não confie apenas nessa visualização.
+- Depois de qualquer sucesso de escrita, recarregue o controle correspondente pelo `GET` correspondente.
+- Após falha `401`, mantenha formulário e dados; após `403`, mantenha o formulário e mostre o perfil exigido.
 
 ### Cadastrar produto
 
@@ -584,6 +666,41 @@ Regras:
 
 ## 7. Caixa
 
+### Fluxo completo da tela de caixa
+
+1. Ao abrir a tela de caixa, consulte primeiro:
+
+```http
+GET /api/caixa/aberto
+```
+
+- resposta `200`: existe um caixa aberto e a tela deve mostrar valor de abertura, operador de abertura e status;
+- resposta `404`: não existe caixa aberto e a tela deve mostrar o botão para abrir caixa;
+- erro `401` não deve ocorrer nessa consulta, pois ela é pública;
+- não considere que o caixa está aberto apenas porque não houve resposta ainda; aguarde a conclusão da requisição.
+
+2. Quando não houver caixa aberto:
+- informe o valor inicial disponível;
+- abra o modal de credenciais;
+- envie `POST /api/caixa/abrir` com valor e credenciais;
+- recarregue `GET /api/caixa/aberto` depois do sucesso.
+
+3. Com o caixa aberto:
+- mostre a movimentação atual quando necessário;
+- permita entrada manual;
+- permita retirada;
+- permita fechamento;
+- recarregue o caixa e as movimentações após cada operação;
+- não permita que vendedor veja ou utilize ações administrativas de caixa.
+
+4. Ao abrir ou fechar o caixa, não reutilize uma movimentação anterior;
+- abertura cria um novo registro de caixa;
+- fechamento encerra o caixa aberto atual;
+- entrada manual e retirada são movimentações ligadas ao caixa aberto;
+- não existe caixa aberto quando o caixa anterior foi fechado.
+
+Somente proprietárias podem abrir, registrar entrada manual, registrar retirada ou fechar caixa. A consulta de caixa aberto e suas movimentações é pública.
+
 ### Consultar caixa aberto
 
 ```http
@@ -611,8 +728,10 @@ JSON:
 Validações:
 
 - valor não negativo;
+- zero é permitido como valor inicial;
 - exige proprietário;
-- não pode existir outro caixa aberto.
+- não pode existir outro caixa aberto;
+- após o sucesso, o caixa passa a ser o caixa ativo da loja.
 
 ### Entrada manual
 
@@ -634,9 +753,10 @@ JSON:
 Regras:
 
 - valor maior que zero;
-- descrição obrigatória;
+- descrição obrigatória após remoção dos espaços extremos;
 - exige caixa aberto;
-- exige proprietário.
+- exige proprietário;
+- o valor é somado ao saldo esperado do caixa.
 
 ### Retirada
 
@@ -658,10 +778,12 @@ JSON:
 Regras:
 
 - valor maior que zero;
-- descrição obrigatória;
+- descrição obrigatória após remoção dos espaços extremos;
 - não pode superar o saldo disponível;
 - exige caixa aberto;
-- exige proprietário.
+- exige proprietário;
+- o valor é descontado do saldo esperado do caixa;
+- quando o frontend calcula um saldo aproximado, a retirada real continua sendo validada pelo backend.
 
 ### Fechar caixa
 
@@ -684,6 +806,11 @@ Validações:
 - valor não negativo;
 - exige proprietário;
 - exige caixa aberto;
+- o valor informado representa o valor físico contado no caixa;
+- a API calcula o valor esperado com o saldo inicial e todas as movimentações;
+- uma sobra ou falta não impede o fechamento;
+- depois do fechamento, não existe mais caixa aberto até que outro seja criado;
+- não confunda a diferença com o status da movimentação: `diferenca` é informada menos o valor esperado.
 
 A resposta contém `caixa`, `diferenca` e `situacao`:
 
@@ -708,6 +835,52 @@ GET /api/caixa/{id}/movimentacoes
 ```
 
 Retorna as movimentações persistidas do caixa informado.
+
+As categorias podem incluir:
+
+- `VENDA`: entrada gerada por uma venda paga em dinheiro;
+- `RETIRADA`: saída registrada pela proprietária;
+- `ENTRADA_MANUAL`: entrada registrada manualmente pela proprietária.
+
+O frontend pode usar `tipo` para distinguir entrada de saída:
+
+- `ENTRADA`: soma ao saldo;
+- `SAIDA`: diminui o saldo.
+
+A movimentação pública pode ser atualizada visualmente após abrir caixa, registrar entrada/retirada ou efetivar uma venda em dinheiro.
+
+### Relação entre venda e caixa
+
+Quando uma venda contém pagamento em dinheiro:
+
+- o backend soma o valor de todo o dinheiro recebido;
+- exige que exista caixa aberto;
+- cria automaticamente uma movimentação `ENTRADA` com categoria `VENDA`;
+- inclui o valor no cálculo do fechamento;
+- não exige que o usuário registre essa entrada manualmente.
+
+Quando uma venda não contém dinheiro:
+
+- PIX, cartão de débito ou cartão de crédito não geram movimentação de caixa;
+- o caixa não precisa estar aberto para concluir essa venda.
+
+Em pagamento misto:
+
+- soma-se dinheiro mais os outros pagamentos;
+- a soma de todos deve ser igual ao total da venda;
+- somente a parte em dinheiro gera movimentação;
+- o caixa deve estar aberto se houver qualquer valor em dinheiro.
+
+O frontend deve orientar o usuário da seguinte forma:
+
+- venda PIX/cartão: caixa não é obrigatório;
+- venda em dinheiro: consultar `GET /api/caixa/aberto` antes de confirmar;
+- venda em dinheiro sem caixa aberto: bloquear a confirmação no frontend e orientar a abertura do caixa;
+- ainda assim, o backend valida novamente, pois o frontend pode estar desatualizado;
+- não criar entrada manual para uma venda em dinheiro, evitando contagem duplicada;
+- após venda em dinheiro, recarregar caixa aberto e movimentações.
+
+A compra não gera qualquer movimentação no caixa.
 
 ## 8. Compras
 
