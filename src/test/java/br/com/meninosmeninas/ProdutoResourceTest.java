@@ -53,7 +53,7 @@ class ProdutoResourceTest {
                           "categoriaId": 1,
                           "quantidade": 0,
                           "preco": 12.50,
-                          "login": "mariana",
+                          "login": "sandra",
                           "senha": "123456"
                         }
                         """)
@@ -67,7 +67,7 @@ class ProdutoResourceTest {
         given()
                 .contentType("application/json")
                 .body("""
-                        { "quantidade": 0, "login": "mariana", "senha": "123456" }
+                        { "quantidade": 0, "login": "sandra", "senha": "123456" }
                         """)
                 .when().patch("/api/produtos/{id}/quantidade", idProduto)
                 .then()
@@ -86,7 +86,7 @@ class ProdutoResourceTest {
                           "categoriaId": 999,
                           "quantidade": 1,
                           "preco": 10.00,
-                          "login": "mariana",
+                          "login": "sandra",
                           "senha": "123456"
                         }
                         """)
@@ -106,7 +106,7 @@ class ProdutoResourceTest {
     void retorna404AoAtualizarProdutoInexistente() {
         given()
                 .contentType("application/json")
-                .body("{ \"quantidade\": 4, \"login\": \"mariana\", \"senha\": \"123456\" }")
+                .body("{ \"quantidade\": 4, \"login\": \"sandra\", \"senha\": \"123456\" }")
                 .when().patch("/api/produtos/99999/quantidade")
                 .then()
                 .statusCode(404);

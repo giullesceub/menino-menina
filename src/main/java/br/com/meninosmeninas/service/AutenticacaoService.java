@@ -19,7 +19,12 @@ public class AutenticacaoService {
             throw new RegraNegocioException("Login e senha são obrigatórios.");
         }
 
-        Funcionario funcionario = funcionarioDAO.buscarPorLogin(credenciais.login().trim())
+        String loginNormalizado = LoginNormalizer.normalizar(credenciais.login());
+        if (loginNormalizado.isBlank()) {
+            throw new RegraNegocioException("Credenciais inválidas.");
+        }
+
+        Funcionario funcionario = funcionarioDAO.buscarPorLogin(loginNormalizado)
                 .orElseThrow(() -> new RegraNegocioException("Credenciais inválidas."));
         if (!funcionario.isAtivo()
                 || !BCrypt.checkpw(credenciais.senha(), funcionario.getSenhaHash())) {

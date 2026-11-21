@@ -16,7 +16,7 @@ class BusinessFlowResourceTest {
                 .body("""
                         {
                           "valor": 10.00,
-                          "login": "lucas",
+                          "login": "fernanda",
                           "senha": "123456"
                         }
                         """)
@@ -35,7 +35,7 @@ class BusinessFlowResourceTest {
                           "categoriaId": 1,
                           "quantidade": 0,
                           "preco": 25.00,
-                          "login": "mariana",
+                          "login": "sandra",
                           "senha": "123456"
                         }
                         """)
@@ -52,7 +52,7 @@ class BusinessFlowResourceTest {
                           "itens": [
                             {"produtoId": %d, "quantidade": 3, "custoUnitario": 10.00}
                           ],
-                          "login": "mariana",
+                          "login": "sandra",
                           "senha": "123456"
                         }
                         """.formatted(produtoId))
@@ -64,7 +64,7 @@ class BusinessFlowResourceTest {
         given()
                 .contentType("application/json")
                 .body("""
-                        {"valor": 20.00, "login": "mariana", "senha": "123456"}
+                        {"valor": 20.00, "login": "sandra", "senha": "123456"}
                         """)
                 .when().post("/api/caixa/abrir")
                 .then()
@@ -77,7 +77,7 @@ class BusinessFlowResourceTest {
                           "clienteId": null,
                           "itens": [{"produtoId": %d, "quantidade": 2}],
                           "pagamentos": [{"formaPagamento": "DINHEIRO", "valor": 50.00}],
-                          "login": "lucas",
+                          "login": "fernanda",
                           "senha": "123456"
                         }
                         """.formatted(produtoId))
@@ -89,7 +89,7 @@ class BusinessFlowResourceTest {
         given()
                 .contentType("application/json")
                 .body("""
-                        {"valor": 70.00, "login": "mariana", "senha": "123456"}
+                        {"valor": 70.00, "login": "sandra", "senha": "123456"}
                         """)
                 .when().post("/api/caixa/fechar")
                 .then()
@@ -100,7 +100,7 @@ class BusinessFlowResourceTest {
         given()
                 .contentType("application/json")
                 .body("""
-                        {"login": "mariana", "senha": "123456"}
+                        {"login": "sandra", "senha": "123456"}
                         """)
                 .when().post("/api/historico/produtos/{id}", produtoId)
                 .then()
@@ -120,7 +120,7 @@ class BusinessFlowResourceTest {
                           "categoriaId": 1,
                           "quantidade": 1,
                           "preco": 20.00,
-                          "login": "mariana",
+                          "login": "sandra",
                           "senha": "123456"
                         }
                         """)
@@ -136,7 +136,7 @@ class BusinessFlowResourceTest {
                           "clienteId": null,
                           "itens": [{"produtoId": %d, "quantidade": 1}],
                           "pagamentos": [{"formaPagamento": "PIX", "valor": 19.99}],
-                          "login": "lucas",
+                          "login": "fernanda",
                           "senha": "123456"
                         }
                         """.formatted(produtoId))
@@ -150,7 +150,7 @@ class BusinessFlowResourceTest {
         given()
                 .contentType("application/json")
                 .body("""
-                        {"valor": 10.00, "login": "mariana", "senha": "errada"}
+                        {"valor": 10.00, "login": "sandra", "senha": "errada"}
                         """)
                 .when().post("/api/caixa/abrir")
                 .then()
@@ -159,7 +159,7 @@ class BusinessFlowResourceTest {
         given()
                 .contentType("application/json")
                 .body("""
-                        {"valor": 10.00, "login": "mariana", "senha": "123456"}
+                        {"valor": 10.00, "login": "sandra", "senha": "123456"}
                         """)
                 .when().post("/api/caixa/abrir")
                 .then()
@@ -168,7 +168,7 @@ class BusinessFlowResourceTest {
         given()
                 .contentType("application/json")
                 .body("""
-                        {"valor": 1.00, "login": "mariana", "senha": "123456"}
+                        {"valor": 1.00, "login": "sandra", "senha": "123456"}
                         """)
                 .when().post("/api/caixa/abrir")
                 .then()
@@ -177,7 +177,7 @@ class BusinessFlowResourceTest {
         given()
                 .contentType("application/json")
                 .body("""
-                        {"valor": 11.00, "descricao": "Retirada inválida", "login": "mariana", "senha": "123456"}
+                        {"valor": 11.00, "descricao": "Retirada inválida", "login": "sandra", "senha": "123456"}
                         """)
                 .when().post("/api/caixa/retirada")
                 .then()
@@ -186,7 +186,7 @@ class BusinessFlowResourceTest {
         given()
                 .contentType("application/json")
                 .body("""
-                        {"valor": 1.00, "descricao": "Troco", "login": "mariana", "senha": "123456"}
+                        {"valor": 1.00, "descricao": "Troco", "login": "sandra", "senha": "123456"}
                         """)
                 .when().post("/api/caixa/entrada")
                 .then()
@@ -195,7 +195,7 @@ class BusinessFlowResourceTest {
         given()
                 .contentType("application/json")
                 .body("""
-                        {"valor": 11.00, "login": "mariana", "senha": "123456"}
+                        {"valor": 11.00, "login": "sandra", "senha": "123456"}
                         """)
                 .when().post("/api/caixa/fechar")
                 .then()
@@ -212,7 +212,7 @@ class BusinessFlowResourceTest {
                         {
                           "fornecedorId": 1,
                           "itens": [{"produtoId": 1, "quantidade": 1, "custoUnitario": 10.00}],
-                          "login": "lucas",
+                          "login": "fernanda",
                           "senha": "123456"
                         }
                         """)
@@ -228,7 +228,7 @@ class BusinessFlowResourceTest {
                           "categoriaId": 1,
                           "quantidade": 0,
                           "preco": 15.00,
-                          "login": "mariana",
+                          "login": "sandra",
                           "senha": "123456"
                         }
                         """)
@@ -240,7 +240,7 @@ class BusinessFlowResourceTest {
         given()
                 .contentType("application/json")
                 .body("""
-                        {"login": "mariana", "senha": "123456"}
+                        {"login": "sandra", "senha": "123456"}
                         """)
                 .when().patch("/api/produtos/{id}/desativar", produtoId)
                 .then()
@@ -253,7 +253,7 @@ class BusinessFlowResourceTest {
                           "clienteId": null,
                           "itens": [{"produtoId": %d, "quantidade": 1}],
                           "pagamentos": [{"formaPagamento": "PIX", "valor": 15.00}],
-                          "login": "lucas",
+                          "login": "fernanda",
                           "senha": "123456"
                         }
                         """.formatted(produtoId))
@@ -264,7 +264,7 @@ class BusinessFlowResourceTest {
         given()
                 .contentType("application/json")
                 .body("""
-                        {"login": "mariana", "senha": "123456"}
+                        {"login": "sandra", "senha": "123456"}
                         """)
                 .when().patch("/api/produtos/{id}/ativar", produtoId)
                 .then()
@@ -276,7 +276,7 @@ class BusinessFlowResourceTest {
         given()
                 .contentType("application/json")
                 .body("""
-                        {"login": "mariana", "senha": "123456"}
+                        {"login": "sandra", "senha": "123456"}
                         """)
                 .when().patch("/api/funcionarios/1/desativar")
                 .then()
@@ -290,7 +290,7 @@ class BusinessFlowResourceTest {
                           "categoriaId": 1,
                           "quantidade": 0,
                           "preco": 18.00,
-                          "login": "mariana",
+                          "login": "sandra",
                           "senha": "123456"
                         }
                         """)
@@ -302,7 +302,7 @@ class BusinessFlowResourceTest {
         given()
                 .contentType("application/json")
                 .body("""
-                        {"login": "lucas", "senha": "123456"}
+                        {"login": "fernanda", "senha": "123456"}
                         """)
                 .when().post("/api/historico/produtos/{id}", produtoId)
                 .then()
@@ -311,7 +311,7 @@ class BusinessFlowResourceTest {
         given()
                 .contentType("application/json")
                 .body("""
-                        {"login": "mariana", "senha": "123456"}
+                        {"login": "sandra", "senha": "123456"}
                         """)
                 .when().post("/api/historico/produtos/{id}", produtoId)
                 .then()
@@ -331,7 +331,7 @@ class BusinessFlowResourceTest {
                             {"formaPagamento": "PIX", "valor": 40.00},
                             {"formaPagamento": "CARTAO_CREDITO", "valor": 49.90}
                           ],
-                          "login": "lucas",
+                          "login": "fernanda",
                           "senha": "123456"
                         }
                         """)
@@ -347,7 +347,7 @@ class BusinessFlowResourceTest {
                           "clienteId": null,
                           "itens": [{"produtoId": 2, "quantidade": 1000}],
                           "pagamentos": [{"formaPagamento": "PIX", "valor": 89900.00}],
-                          "login": "lucas",
+                          "login": "fernanda",
                           "senha": "123456"
                         }
                         """)
@@ -361,7 +361,7 @@ class BusinessFlowResourceTest {
         given()
                 .contentType("application/json")
                 .body("""
-                        {"login": "mariana", "senha": "123456"}
+                        {"login": "sandra", "senha": "123456"}
                         """)
                 .when().patch("/api/fornecedores/1/desativar")
                 .then()
@@ -373,7 +373,7 @@ class BusinessFlowResourceTest {
                         {
                           "fornecedorId": 1,
                           "itens": [{"produtoId": 1, "quantidade": 1, "custoUnitario": 10.00}],
-                          "login": "mariana",
+                          "login": "sandra",
                           "senha": "123456"
                         }
                         """)
@@ -384,7 +384,7 @@ class BusinessFlowResourceTest {
         given()
                 .contentType("application/json")
                 .body("""
-                        {"login": "mariana", "senha": "123456"}
+                        {"login": "sandra", "senha": "123456"}
                         """)
                 .when().patch("/api/fornecedores/1/ativar")
                 .then()
@@ -396,7 +396,7 @@ class BusinessFlowResourceTest {
         given()
                 .contentType("application/json")
                 .body("""
-                        {"valor": 5.00, "login": "mariana", "senha": "123456"}
+                        {"valor": 5.00, "login": "sandra", "senha": "123456"}
                         """)
                 .when().post("/api/caixa/abrir")
                 .then()
@@ -405,7 +405,7 @@ class BusinessFlowResourceTest {
         given()
                 .contentType("application/json")
                 .body("""
-                        {"valor": 7.00, "login": "mariana", "senha": "123456"}
+                        {"valor": 7.00, "login": "sandra", "senha": "123456"}
                         """)
                 .when().post("/api/caixa/fechar")
                 .then()
@@ -416,7 +416,7 @@ class BusinessFlowResourceTest {
         given()
                 .contentType("application/json")
                 .body("""
-                        {"valor": 5.00, "login": "mariana", "senha": "123456"}
+                        {"valor": 5.00, "login": "sandra", "senha": "123456"}
                         """)
                 .when().post("/api/caixa/abrir")
                 .then()
@@ -425,7 +425,7 @@ class BusinessFlowResourceTest {
         given()
                 .contentType("application/json")
                 .body("""
-                        {"valor": 3.00, "login": "mariana", "senha": "123456"}
+                        {"valor": 3.00, "login": "sandra", "senha": "123456"}
                         """)
                 .when().post("/api/caixa/fechar")
                 .then()
@@ -446,7 +446,7 @@ class BusinessFlowResourceTest {
                           "login": "vendedor_temporario",
                           "senha": "123456",
                           "perfil": "VENDEDOR",
-                          "operadorLogin": "mariana",
+                          "operadorLogin": "sandra",
                           "operadorSenha": "123456"
                         }
                         """)
@@ -458,7 +458,7 @@ class BusinessFlowResourceTest {
         given()
                 .contentType("application/json")
                 .body("""
-                        {"login": "mariana", "senha": "123456"}
+                        {"login": "sandra", "senha": "123456"}
                         """)
                 .when().patch("/api/funcionarios/{id}/desativar", funcionarioId)
                 .then()
@@ -476,11 +476,70 @@ class BusinessFlowResourceTest {
         given()
                 .contentType("application/json")
                 .body("""
-                        {"login": "mariana", "senha": "123456"}
+                        {"login": "sandra", "senha": "123456"}
                         """)
                 .when().patch("/api/funcionarios/{id}/ativar", funcionarioId)
                 .then()
                 .statusCode(200);
+    }
+
+    @Test
+    void permiteFuncionarioAlterarProprioCadastroSemAlterarDadosImutaveis() {
+        given()
+                .contentType("application/json")
+                .body("""
+                        {
+                          "nome": " Fernanda Atualizada ",
+                          "telefone": " 61999990030 ",
+                          "login": "fernanda",
+                          "senha": "123456"
+                        }
+                        """)
+                .when().put("/api/funcionarios/3")
+                .then()
+                .statusCode(200)
+                .body("nome", equalTo("Fernanda Atualizada"))
+                .body("telefone", equalTo("61999990030"))
+                .body("login", equalTo("fernanda"))
+                .body("cpf", equalTo("12345678909"))
+                .body("perfil", equalTo("VENDEDOR"));
+    }
+
+    @Test
+    void proprietariaPodeResetarSenhaDeOutroFuncionario() {
+        given()
+                .contentType("application/json")
+                .body("""
+                        {
+                          "nome": "Carla Mendes",
+                          "telefone": "61999990004",
+                          "novaSenha": "resetada123",
+                          "login": "sandra",
+                          "senha": "123456"
+                        }
+                        """)
+                .when().put("/api/funcionarios/4")
+                .then()
+                .statusCode(200)
+                .body("login", equalTo("carla"))
+                .body("cpf", equalTo("93541134780"));
+    }
+
+    @Test
+    void vendedorNaoPodeAlterarCadastroDeOutroFuncionario() {
+        given()
+                .contentType("application/json")
+                .body("""
+                        {
+                          "nome": "Carla Atualizada",
+                          "telefone": "61999990004",
+                          "login": "fernanda",
+                          "senha": "123456"
+                        }
+                        """)
+                .when().put("/api/funcionarios/4")
+                .then()
+                .statusCode(403);
     }
 
     @Test

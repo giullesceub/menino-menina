@@ -24,6 +24,21 @@ public class FuncionarioResource {
         return Response.status(Response.Status.CREATED).entity(new Resposta(salvo.getId(), salvo.getNome(),
                 salvo.getCpf(), salvo.getTelefone(), salvo.getLogin(), salvo.getPerfil(), salvo.isAtivo())).build();
     }
+    @PUT @Path("/{id}") public Response atualizar(@PathParam("id") Long id,
+            br.com.meninosmeninas.rest.dto.AtualizarFuncionarioRequest r) {
+        if (r == null) {
+            return Response.status(Response.Status.BAD_REQUEST)
+                    .entity(new br.com.meninosmeninas.rest.dto.ErroResponse("O corpo da requisição é obrigatório."))
+                    .build();
+        }
+
+        Funcionario f = service.atualizarCadastro(id,
+                new FuncionarioService.AtualizarCadastroFuncionario(
+                        r.nome(), r.telefone(), r.novaSenha(), r.login(), r.senha()));
+        return Response.ok(new Resposta(f.getId(), f.getNome(), f.getCpf(), f.getTelefone(),
+                f.getLogin(), f.getPerfil(), f.isAtivo())).build();
+    }
+
     @PATCH @Path("/{id}/desativar") public Response desativar(@PathParam("id") Long id, br.com.meninosmeninas.rest.dto.CredenciaisRequest r) {
         Funcionario f = service.desativar(r.toCredentials(), id);
         return Response.ok(new Resposta(f.getId(), f.getNome(), f.getCpf(), f.getTelefone(),

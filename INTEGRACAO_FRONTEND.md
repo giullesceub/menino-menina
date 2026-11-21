@@ -60,7 +60,7 @@ Exemplo:
 
 ```json
 {
-  "login": "mariana",
+  "login": "sandra",
   "senha": "123456",
   "valor": 100
 }
@@ -134,14 +134,33 @@ O seed fornece estas contas iniciais. Use somente no ambiente de homologação:
 
 | Login | Senha | Perfil |
 |---|---|---|
-| mariana | 123456 | PROPRIETARIA |
-| lucas | 123456 | VENDEDOR |
+| sandra | 123456 | PROPRIETARIA |
+| luiz | 123456 | PROPRIETARIA |
 | fernanda | 123456 | VENDEDOR |
 | carla | 123456 | VENDEDOR |
 
-Não existe endpoint de login que devolva token. Para validar credenciais, envie login/senha junto da operação protegida.
+Não existe endpoint de login que devolva token. Não existe cookie de sessão nem JWT no backend. Para validar credenciais, envie `login` e `senha` junto de cada operação protegida.
 
-A interface deve manter o perfil do usuário e os dados necessários para repetir o login em operações protegidas. Não tente inferir a senha novamente e não envie credenciais em URLs GET.
+O frontend pode armazenar temporariamente o login do operador em memória enquanto a página estiver aberta. A senha não deve ser armazenada em `localStorage`, `sessionStorage` ou cookies. Cada cadastro ou alteração pode abrir novamente o modal de credenciais. Essa opção evita armazenar senha, mantém o fluxo simples e garante que cada operação seja validada pelo backend.
+
+Caso o frontend escolha guardar temporariamente a senha em estado da aplicação ou em memória durante o uso, ela poderá ser reaproveitada no modal, mas não deve permanecer após recarregar ou fechar a página. Apesar de possível, essa decisão é menos segura e não cria uma sessão no backend.
+
+### Fluxo recomendado para escrituras
+
+1. A tela consulta normalmente os dados existentes por um endpoint `GET`.
+2. O usuário abre o formulário de cadastro ou alteração.
+3. Ao tentar enviar, o frontend abre um modal/pop-up pedindo login e senha.
+4. O modal não autoriza a operação por si só: ele apenas coleta credenciais.
+5. O frontend envia no mesmo JSON os dados do formulário e `login`/`senha`.
+6. O backend autentica o funcionário e verifica perfil/permissão.
+7. Se autorizado, a operação é concluída e o frontend recarrega a lista ou o recurso alterado.
+8. Se houver `401`, as credenciais estão ausentes ou incorretas. Mantenha o formulário principal e o modal abertos, limpe somente a senha do modal e permita nova tentativa.
+9. Se houver `403`, o usuário existe e está autenticado, mas não possui perfil necessário. Mantenha o formulário e informe que a operação exige outro nível de acesso. Não repita automaticamente a operação.
+10. Se houver `400`, corrija ou informe a mensagem de regra de negócio. Não limpe automaticamente todos os dados já preenchidos.
+11. Nunca limpe o formulário de cadastro ou feche o modal por um simples erro de credencial.
+12. Não reenvie automaticamente um POST ou PATCH após erro. O usuário deve confirmar novamente no modal.
+
+O frontend pode indicar visualmente que uma ação exige proprietário ou vendedor, mas essa indicação é apenas informativa. O backend continua sendo a autoridade sobre autorização. Não implemente proteção apenas escondendo botões: chamadas diretas à API ainda serão validadas pelo backend.
 
 ### Permissões esperadas
 
@@ -149,7 +168,7 @@ A interface deve manter o perfil do usuário e os dados necessários para repeti
 - Cliente: cadastro e atualização permitem qualquer funcionário autenticado. Desativação/ativação exige `PROPRIETARIA`.
 - Fornecedor: cadastro, atualização e ativação/desativação exigem `PROPRIETARIA`.
 - Produto: cadastro e atualização de quantidade exigem `PROPRIETARIA`.
-- Funcionário: cadastro e ativação/desativação exigem `PROPRIETARIA`.
+- Funcionário: cadastro e ativação/desativação exigem `PROPRIETARIA`. Alteração de próprio cadastro é permitida para proprietário ou vendedor. Alteração de outro funcionário exige `PROPRIETARIA`.
 - Compra: exige `PROPRIETARIA`.
 - Venda: exige funcionário autenticado, proprietário ou vendedor.
 - Caixa: abertura, entrada manual, retirada e fechamento exigem `PROPRIETARIA`. Consulta aberta exige caixa aberto.
@@ -260,10 +279,10 @@ Resposta:
 [
   {
     "id": 1,
-    "nome": "Mariana Souza",
+    "nome": "Sandra Uchikado",
     "cpf": "11144477735",
     "telefone": "61999990001",
-    "login": "mariana",
+    "login": "sandra",
     "perfil": "PROPRIETARIA",
     "ativo": true
   }
@@ -288,7 +307,7 @@ JSON:
   "categoriaId": 1,
   "quantidade": 0,
   "preco": 12.50,
-  "login": "mariana",
+  "login": "sandra",
   "senha": "123456"
 }
 ```
@@ -318,7 +337,7 @@ JSON:
 ```json
 {
   "quantidade": 10,
-  "login": "mariana",
+  "login": "sandra",
   "senha": "123456"
 }
 ```
@@ -340,7 +359,7 @@ JSON:
 
 ```json
 {
-  "login": "mariana",
+  "login": "sandra",
   "senha": "123456"
 }
 ```
@@ -368,7 +387,7 @@ JSON:
   "nome": "Joana Silva",
   "cpf": "39053344705",
   "telefone": "61988889999",
-  "login": "lucas",
+  "login": "luiz",
   "senha": "123456"
 }
 ```
@@ -400,7 +419,7 @@ JSON:
   "nome": "Joana Silva",
   "cpf": "39053344705",
   "telefone": "61988889999",
-  "login": "lucas",
+  "login": "luiz",
   "senha": "123456"
 }
 ```
@@ -416,7 +435,7 @@ Corpo:
 
 ```json
 {
-  "login": "mariana",
+  "login": "sandra",
   "senha": "123456"
 }
 ```
@@ -438,7 +457,7 @@ JSON:
   "cnpj": "11222333000181",
   "telefone": "1133334444",
   "email": "contato@exemplo.com.br",
-  "login": "mariana",
+  "login": "sandra",
   "senha": "123456"
 }
 ```
@@ -484,7 +503,7 @@ JSON:
   "login": "paula",
   "senha": "senhaNova",
   "perfil": "VENDEDOR",
-  "operadorLogin": "mariana",
+  "operadorLogin": "sandra",
   "operadorSenha": "123456"
 }
 ```
@@ -507,6 +526,37 @@ Validações:
 
 A senha de um funcionário é armazenada como hash BCrypt. Não retorna senha nem hash.
 
+### Alterar cadastro de funcionário
+
+```http
+PUT /api/funcionarios/{id}
+```
+
+JSON:
+
+```json
+{
+  "nome": "Sandra Uchikado",
+  "telefone": "61999990001",
+  "novaSenha": "novaSenhaOpcional",
+  "login": "fernanda",
+  "senha": "123456"
+}
+```
+
+Regras:
+
+- `nome` e `telefone` podem ser alterados;
+- `novaSenha` é opcional. Quando vazia ou ausente, a senha atual é preservada;
+- o próprio funcionário autenticado pode alterar seu próprio cadastro;
+- apenas proprietário pode alterar o cadastro de outro funcionário;
+- login, CPF, perfil e situação ativo são preservados neste endpoint e não devem ser enviados;
+- senha nova pode ser definida pelo próprio funcionário ou por uma proprietária como reset de senha;
+- vendedor não pode alterar cadastro de outro vendedor ou de um proprietário;
+- telefone vazio é convertido em `null` pelo backend;
+- nome vazio é rejeitado;
+- todos os textos são removidos de espaços nas extremidades pelo backend.
+
 ### Desativar ou reativar funcionário
 
 ```http
@@ -518,7 +568,7 @@ JSON:
 
 ```json
 {
-  "login": "mariana",
+  "login": "sandra",
   "senha": "123456"
 }
 ```
@@ -550,7 +600,7 @@ JSON:
 ```json
 {
   "valor": 100.00,
-  "login": "mariana",
+  "login": "sandra",
   "senha": "123456"
 }
 ```
@@ -573,7 +623,7 @@ JSON:
 {
   "valor": 50.00,
   "descricao": "Troco adicional",
-  "login": "mariana",
+  "login": "sandra",
   "senha": "123456"
 }
 ```
@@ -597,7 +647,7 @@ JSON:
 {
   "valor": 30.00,
   "descricao": "Pagamento de fornecedor",
-  "login": "mariana",
+  "login": "sandra",
   "senha": "123456"
 }
 ```
@@ -621,7 +671,7 @@ JSON:
 ```json
 {
   "valor": 145.50,
-  "login": "mariana",
+  "login": "sandra",
   "senha": "123456"
 }
 ```
@@ -674,7 +724,7 @@ JSON:
       "custoUnitario": 20.00
     }
   ],
-  "login": "mariana",
+  "login": "sandra",
   "senha": "123456"
 }
 ```
@@ -716,7 +766,7 @@ JSON:
       "valor": 79.80
     }
   ],
-  "login": "lucas",
+  "login": "luiz",
   "senha": "123456"
 }
 ```
@@ -762,7 +812,7 @@ Exemplo:
     { "formaPagamento": "DINHEIRO", "valor": 20.00 },
     { "formaPagamento": "PIX", "valor": 19.90 }
   ],
-  "login": "lucas",
+  "login": "luiz",
   "senha": "123456"
 }
 ```
@@ -786,7 +836,7 @@ Corpo:
 
 ```json
 {
-  "login": "mariana",
+  "login": "sandra",
   "senha": "123456"
 }
 ```
@@ -862,6 +912,10 @@ Nas telas:
 - desabilite o botão de ação enquanto o request estiver pendente;
 - use loading global ou por ação;
 - não permita dois cadastros ou vendas iguais por duplo clique;
+- desabilite o botão confirmar do modal enquanto a requisição estiver pendente;
+- mantenha o formulário preenchido e o modal disponível após `401` ou erro de validação;
+- limpe somente a senha após credencial rejeitada;
+- não implemente autorização verdadeira apenas escondendo botões no frontend;
 - em caso de timeout do Render, aguarde e permita nova tentativa manual;
 - após venda, compra ou alteração de estoque, recarregue `GET /api/produtos`;
 - após abrir, movimentar ou fechar caixa, recarregue o caixa aberto e movimentações;

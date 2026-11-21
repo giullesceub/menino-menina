@@ -26,6 +26,15 @@ public class FuncionarioService {
                 || funcionario.getNome().isBlank()) {
             throw new RegraNegocioException("Dados do funcionário são inválidos.");
         }
+        String loginNormalizado = LoginNormalizer.normalizar(funcionario.getLogin());
+        if (loginNormalizado.isBlank()) {
+            throw new RegraNegocioException("Login inválido.");
+        }
+        if (funcionarioDAO.buscarPorLogin(loginNormalizado).isPresent()) {
+            throw new RegraNegocioException("Login já cadastrado.");
+        }
+
+        funcionario.setLogin(loginNormalizado);
         funcionario.setCpf(DadosCadastrais.cpfOpcional(funcionario.getCpf()));
         funcionario.setTelefone(DadosCadastrais.telefoneOpcional(funcionario.getTelefone()));
         funcionario.setSenhaHash(BCrypt.hashpw(senha, BCrypt.gensalt(10)));
@@ -33,6 +42,41 @@ public class FuncionarioService {
         Funcionario salvo = funcionarioDAO.inserir(funcionario);
         historicoService.registrar(salvo, usuario, "I");
         return salvo;
+    }
+
+    @Transactional
+    public Funcionario atualizarCadastro(Long id, AtualizarCadastroFuncionario dados) {
+        Funcionario operador = autenticacaoService.autenticar(
+                new Credenciais(dados.login(), dados.senha()));
+        Funcionario existente = funcionarioDAO.buscarPorId(id);
+        if (existente == null) {
+            throw new RegraNegocioException("Funcionário não encontrado.");
+        }
+
+        boolean alteraProprioCadastro = existente.getId().equals(operador.getId());
+        if (!alteraProprioCadastro && operador.getPerfil() != Funcionario.Perfil.PROPRIETARIA) {
+            throw new RegraNegocioException("Funcionário sem permissão para esta operação.");
+        }
+
+        if (dados.nome() == null || dados.nome().trim().isBlank()) {
+            throw new RegraNegocioException("Nome do funcionário é obrigatório.");
+        }
+
+        existente.setNome(dados.nome().trim().replaceAll("\\s+", " "));
+        existente.setTelefone(DadosCadastrais.telefoneOpcional(dados.telefone()));
+
+        if (dados.novaSenha() != null && !dados.novaSenha().isBlank()) {
+            existente.setSenhaHash(BCrypt.hashpw(dados.novaSenha(), BCrypt.gensalt(10)));
+        }
+
+        // Login, CPF, perfil e ativo são deliberadamente preservados neste endpoint.
+        Funcionario salvo = funcionarioDAO.atualizar(existente);
+        historicoService.registrar(salvo, operador, "A");
+        return salvo;
+    }
+
+    public record AtualizarCadastroFuncionario(String nome, String telefone, String novaSenha,
+                                               String login, String senha) {
     }
 
     @Transactional
