@@ -121,7 +121,7 @@ CREATE TABLE historico_funcionario (
     perfil VARCHAR(20) NOT NULL,
     ativo BOOLEAN NOT NULL,
     timestamp_alteracao TIMESTAMP NOT NULL,
-    tipo_atualizacao CHAR(1) NOT NULL CHECK (tipo_atualizacao IN ('I', 'A')),
+    tipo_atualizacao VARCHAR(1) NOT NULL CHECK (tipo_atualizacao IN ('I', 'A')),
     usuario_id BIGINT NOT NULL,
     PRIMARY KEY (funcionario_id, timestamp_alteracao)
 );
@@ -133,7 +133,7 @@ CREATE TABLE historico_cliente (
     telefone VARCHAR(20),
     ativo BOOLEAN NOT NULL,
     timestamp_alteracao TIMESTAMP NOT NULL,
-    tipo_atualizacao CHAR(1) NOT NULL CHECK (tipo_atualizacao IN ('I', 'A')),
+    tipo_atualizacao VARCHAR(1) NOT NULL CHECK (tipo_atualizacao IN ('I', 'A')),
     usuario_id BIGINT NOT NULL,
     PRIMARY KEY (cliente_id, timestamp_alteracao)
 );
@@ -147,7 +147,7 @@ CREATE TABLE historico_fornecedor (
     email VARCHAR(120),
     ativo BOOLEAN NOT NULL,
     timestamp_alteracao TIMESTAMP NOT NULL,
-    tipo_atualizacao CHAR(1) NOT NULL CHECK (tipo_atualizacao IN ('I', 'A')),
+    tipo_atualizacao VARCHAR(1) NOT NULL CHECK (tipo_atualizacao IN ('I', 'A')),
     usuario_id BIGINT NOT NULL,
     PRIMARY KEY (fornecedor_id, timestamp_alteracao)
 );
@@ -164,7 +164,13 @@ CREATE TABLE historico_produto (
     fornecedor_id BIGINT,
     ativo BOOLEAN NOT NULL,
     timestamp_alteracao TIMESTAMP NOT NULL,
-    tipo_atualizacao CHAR(1) NOT NULL CHECK (tipo_atualizacao IN ('I', 'A')),
+    tipo_atualizacao VARCHAR(1) NOT NULL CHECK (tipo_atualizacao IN ('I', 'A')),
     usuario_id BIGINT NOT NULL,
     PRIMARY KEY (produto_id, timestamp_alteracao)
 );
+
+-- Migracao segura para bancos criados anteriormente com CHAR(1).
+ALTER TABLE historico_funcionario ALTER COLUMN tipo_atualizacao TYPE VARCHAR(1);
+ALTER TABLE historico_cliente ALTER COLUMN tipo_atualizacao TYPE VARCHAR(1);
+ALTER TABLE historico_fornecedor ALTER COLUMN tipo_atualizacao TYPE VARCHAR(1);
+ALTER TABLE historico_produto ALTER COLUMN tipo_atualizacao TYPE VARCHAR(1);

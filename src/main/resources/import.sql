@@ -68,25 +68,25 @@ CREATE TABLE IF NOT EXISTS movimentacao_caixa (
 CREATE TABLE IF NOT EXISTS historico_funcionario (
  funcionario_id BIGINT NOT NULL, nome VARCHAR(120) NOT NULL, cpf VARCHAR(14), telefone VARCHAR(20),
  login VARCHAR(50) NOT NULL, perfil VARCHAR(20) NOT NULL, ativo BOOLEAN NOT NULL,
- timestamp_alteracao TIMESTAMP NOT NULL, tipo_atualizacao CHAR(1) NOT NULL CHECK (tipo_atualizacao IN ('I','A')), usuario_id BIGINT NOT NULL,
+ timestamp_alteracao TIMESTAMP NOT NULL, tipo_atualizacao VARCHAR(1) NOT NULL CHECK (tipo_atualizacao IN ('I','A')), usuario_id BIGINT NOT NULL,
  PRIMARY KEY (funcionario_id, timestamp_alteracao)
 );
 CREATE TABLE IF NOT EXISTS historico_cliente (
  cliente_id BIGINT NOT NULL, nome VARCHAR(120) NOT NULL, cpf VARCHAR(14), telefone VARCHAR(20),
- ativo BOOLEAN NOT NULL, timestamp_alteracao TIMESTAMP NOT NULL, tipo_atualizacao CHAR(1) NOT NULL CHECK (tipo_atualizacao IN ('I','A')),
+ ativo BOOLEAN NOT NULL, timestamp_alteracao TIMESTAMP NOT NULL, tipo_atualizacao VARCHAR(1) NOT NULL CHECK (tipo_atualizacao IN ('I','A')),
  usuario_id BIGINT NOT NULL, PRIMARY KEY (cliente_id, timestamp_alteracao)
 );
 CREATE TABLE IF NOT EXISTS historico_fornecedor (
  fornecedor_id BIGINT NOT NULL, razao_social VARCHAR(150) NOT NULL, nome_fantasia VARCHAR(150),
  cnpj VARCHAR(18), telefone VARCHAR(20), email VARCHAR(120), ativo BOOLEAN NOT NULL,
- timestamp_alteracao TIMESTAMP NOT NULL, tipo_atualizacao CHAR(1) NOT NULL CHECK (tipo_atualizacao IN ('I','A')), usuario_id BIGINT NOT NULL,
+ timestamp_alteracao TIMESTAMP NOT NULL, tipo_atualizacao VARCHAR(1) NOT NULL CHECK (tipo_atualizacao IN ('I','A')), usuario_id BIGINT NOT NULL,
  PRIMARY KEY (fornecedor_id, timestamp_alteracao)
 );
 CREATE TABLE IF NOT EXISTS historico_produto (
  produto_id BIGINT NOT NULL, nome VARCHAR(150) NOT NULL, categoria_id BIGINT NOT NULL,
  tamanho VARCHAR(20), cor VARCHAR(30),  codigo_barras VARCHAR(50), preco_venda NUMERIC(10,2) NOT NULL, estoque_atual INTEGER NOT NULL,
  fornecedor_id BIGINT, ativo BOOLEAN NOT NULL,
- timestamp_alteracao TIMESTAMP NOT NULL, tipo_atualizacao CHAR(1) NOT NULL CHECK (tipo_atualizacao IN ('I','A')), usuario_id BIGINT NOT NULL,
+ timestamp_alteracao TIMESTAMP NOT NULL, tipo_atualizacao VARCHAR(1) NOT NULL CHECK (tipo_atualizacao IN ('I','A')), usuario_id BIGINT NOT NULL,
  PRIMARY KEY (produto_id, timestamp_alteracao)
 );
 
