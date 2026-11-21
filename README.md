@@ -24,6 +24,8 @@ Os testes automatizados usam H2 em memória:
 
 O perfil `prod`, usado no Render, conecta ao PostgreSQL persistente do Supabase. Nesse perfil, a aplicação não recria o banco e não executa `import.sql`; o conteúdo de `src/main/resources/schema.sql` deve ser aplicado uma vez no SQL Editor do Supabase.
 
+O datasource padrão do arquivo de configuração é PostgreSQL para que o Quarkus consiga montar o artefato de produção durante o build do Render. A URL, o usuário e a senha padrão são apenas fallbacks sem segredo; no Render, as variáveis `QUARKUS_DATASOURCE_*` substituem esses valores. Os perfis `dev` e `test` substituem o datasource por H2.
+
 Para inserir dados iniciais no ambiente de homologação, execute uma única vez o conteúdo de `src/main/resources/supabase-seed.sql`, depois de `schema.sql`. Esse script não deve ser usado nos testes H2.
 
 No Render, configure estas variáveis de ambiente:
